@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>留学生本地生活匹配助手 Demo</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background:#f7f7f7; margin:0; padding:32px; color:#222; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .card { background:#fff; border-radius:16px; padding:24px; box-shadow:0 6px 24px rgba(0,0,0,.06); margin-bottom:20px; }
+    h1 { margin:0 0 8px; font-size:28px; }
+    .sub { color:#666; margin-bottom:20px; line-height:1.7; }
+    .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    label { display:block; font-size:14px; color:#444; margin-bottom:6px; }
+    input, select, textarea, button { width:100%; box-sizing:border-box; border:1px solid #ddd; border-radius:12px; padding:12px 14px; font-size:14px; }
+    textarea { min-height:96px; resize:vertical; }
+    button { background:#ff2442; color:#fff; border:none; font-weight:600; cursor:pointer; }
+    button:hover { opacity:.92; }
+    .results { display:none; }
+    .tag { display:inline-block; background:#fff1f3; color:#ff2442; padding:6px 10px; border-radius:999px; font-size:12px; margin-right:8px; margin-bottom:8px; }
+    .item { border:1px solid #eee; border-radius:14px; padding:16px; margin-top:12px; }
+    .score { float:right; color:#ff2442; font-weight:700; }
+    .muted { color:#666; font-size:13px; line-height:1.7; }
+    .footer { color:#888; font-size:12px; margin-top:18px; line-height:1.6; }
+    @media (max-width: 760px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>留学生本地生活匹配助手 Demo</h1>
+      <div class="sub">
+        一个基于 AI 的供需撮合原型。用户输入所在城市、预算、偏好和需求后，系统会生成用户画像，匹配更适合的本地生活方案，
+        并给出推荐理由，模拟“内容种草 + 决策辅助 + 服务匹配”的产品链路。
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>所在城市</label>
+          <select id="city">
+            <option>Sydney</option>
+            <option>Melbourne</option>
+            <option>Brisbane</option>
+          </select>
+        </div>
+        <div>
+          <label>月预算（AUD）</label>
+          <input id="budget" type="number" value="300" />
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:16px;">
+        <div>
+          <label>购买频率</label>
+          <select id="freq">
+            <option>每周一次</option>
+            <option>每周两次</option>
+            <option>按需购买</option>
+          </select>
+        </div>
+        <div>
+          <label>最看重什么</label>
+          <select id="priority">
+            <option>性价比</option>
+            <option>有机健康</option>
+            <option>配送便捷</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <label>补充需求</label>
+        <textarea id="need" placeholder="例如：希望买到更便宜的新鲜蔬菜；最好支持华人社群团购；平时学习忙，希望配送准时。">希望买到更便宜的新鲜蔬菜，最好支持华人社群团购，平时学习忙，希望配送准时。</textarea>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button onclick="generateResult()">生成匹配结果</button>
+      </div>
+    </div>
+
+    <div class="card results" id="results">
+      <h2 style="margin-top:0;">AI 分析结果</h2>
+      <div id="persona"></div>
+      <div id="reco"></div>
+      <div class="footer">
+        Demo 说明：当前为静态原型，重点展示“需求输入—用户画像—供需匹配—推荐解释”的核心流程。
+        后续可接入真实商家数据、价格波动、履约能力及转化埋点，进一步验证点击率、留资率和下单转化率。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function generateResult() {
+      const city = document.getElementById('city').value;
+      const budget = Number(document.getElementById('budget').value || 0);
+      const freq = document.getElementById('freq').value;
+      const priority = document.getElementById('priority').value;
+      const need = document.getElementById('need').value.trim();
+
+      let persona = "价格敏感型";
+      if (priority === "有机健康") persona = "品质健康型";
+      if (priority === "配送便捷") persona = "效率导向型";
+
+      let matches = [];
+      if (priority === "性价比") {
+        matches = [
+          ["华人社群团购包", 92, "适合预算敏感用户，组合采购降低客单价，适合每周固定补货。"],
+          ["本地农场直采套餐", 85, "缩短供应链，能兼顾新鲜度和价格，但履约时效略弱于平台即时配送。"],
+          ["综合生鲜平台优惠券专区", 80, "购买门槛低，适合按需购买，但长期复购成本未必最低。"]
+        ];
+      } else if (priority === "有机健康") {
+        matches = [
+          ["本地有机农场订阅制", 93, "更符合品质诉求，适合稳定复购，能强化用户粘性。"],
+          ["精选健康食材周包", 87, "SKU 更聚焦，降低选择成本，适合有明确饮食管理目标的用户。"],
+          ["社区拼单有机专区", 78, "价格更友好，但品质稳定性依赖供给端管理。"]
+        ];
+      } else {
+        matches = [
+          ["次日达生鲜平台", 91, "配送确定性强，适合学习或工作节奏快的用户。"],
+          ["固定时段团购自提", 82, "履约效率尚可，但需要用户配合取货。"],
+          ["本地农场直送", 76, "体验更有特色，但配送覆盖和时效波动较大。"]
+        ];
+      }
+
+      document.getElementById('persona').innerHTML = `
+        <div style="margin-bottom:12px;">
+          <span class="tag">${city}</span>
+          <span class="tag">${freq}</span>
+          <span class="tag">${priority}</span>
+          <span class="tag">预算 ${budget} AUD/月</span>
+        </div>
+        <div class="item">
+          <strong>用户画像：</strong>${persona}<br/>
+          <div class="muted" style="margin-top:8px;">
+            结合输入信息，系统判断该用户更关注 <b>${priority}</b>，且希望在 ${city} 以更低决策成本完成购买。
+            当前需求可归纳为：“基于明确目标的本地生活决策与服务匹配”。
+          </div>
+        </div>
+      `;
+
+      document.getElementById('reco').innerHTML = `
+        <div class="item">
+          <strong>需求摘要</strong>
+          <div class="muted" style="margin-top:8px;">${need || "无补充需求"}</div>
+        </div>
+        ${matches.map(m => `
+          <div class="item">
+            <strong>${m[0]}</strong>
+            <span class="score">匹配度 ${m[1]}</span>
+            <div class="muted" style="margin-top:8px;">${m[2]}</div>
+          </div>
+        `).join('')}
+      `;
+
+      document.getElementById('results').style.display = 'block';
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
